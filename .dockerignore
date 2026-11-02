@@ -1,0 +1,9 @@
+.venv-inspect
+.git
+__pycache__
+.pytest_cache
+runtime
+runs
+data
+tests
+reports/training.log

@@ -1,0 +1,22 @@
+{
+  "description": "Original procedurally generated synthetic metal textures; one class: surface_defect.",
+  "seed": 42,
+  "image_size": 128,
+  "splits": {
+    "train": {
+      "images": 480,
+      "clean_images": 151,
+      "defect_boxes": 644
+    },
+    "val": {
+      "images": 120,
+      "clean_images": 51,
+      "defect_boxes": 143
+    },
+    "test": {
+      "images": 120,
+      "clean_images": 33,
+      "defect_boxes": 177
+    }
+  }
+}

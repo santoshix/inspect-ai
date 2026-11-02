@@ -1,0 +1,27 @@
+InspectAI delivery verification
+
+Executed in this environment:
+- Generated 480 train / 120 validation / 120 test synthetic images and YOLO labels.
+- Trained YOLOv8n from architecture initialization for 40 requested epochs on CPU.
+- Selected the best checkpoint using validation data, then evaluated the held-out test split.
+- Test detection mAP@50: 0.955619; mAP@50:95: 0.821465.
+- Image-level test counts at confidence 0.35: TP 87, TN 33, FP 0, FN 0.
+- CPU model.predict median: 6.83 ms on this machine; not an end-to-end API latency claim.
+- Automated tests: 18 passed. One upstream Starlette/httpx deprecation warning.
+- Batch command: processed all 6 bundled samples and produced PNG/JSON output.
+- JavaScript syntax checked with node --check.
+- Real browser: Chromium 134 via Playwright.
+- Browser sample inspection, file upload, CSV download and history updates passed.
+- No uncaught browser JavaScript errors observed.
+- Desktop 1440 px and mobile 390 px renders inspected; no page-level mobile horizontal overflow.
+- FastAPI startup and real HTTP health endpoint used during browser testing.
+
+Not executed here:
+- Windows .bat launchers (no Windows host available).
+- Docker image build / Compose startup (Docker executable unavailable).
+- GitHub Actions workflow on GitHub; no remote repository was created or pushed.
+- AWS or any other cloud deployment.
+- Real factory-data evaluation.
+
+The test results describe an educational synthetic-data system, not production certification.
+See evaluation.json for full metric definitions, limitations and model SHA-256.

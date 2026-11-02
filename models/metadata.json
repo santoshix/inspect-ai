@@ -1,0 +1,9 @@
+{
+  "architecture": "YOLOv8n",
+  "initialization": "yolov8n.yaml",
+  "epochs_requested": 40,
+  "image_size": 128,
+  "training_seed": 42,
+  "data_yaml": "dataset.yaml",
+  "scope": "Synthetic surface textures only, unless retrained on a different dataset."
+}

@@ -1,0 +1,41 @@
+{
+  "evaluated_at": "2026-10-31T01:53:01.983537+00:00",
+  "dataset": "Original synthetic surface textures",
+  "split": "test",
+  "test_images": 120,
+  "threshold": 0.35,
+  "detection": {
+    "mAP50": 0.955619028959855,
+    "mAP50_95": 0.8214648667062934,
+    "precision_at_ultralytics_best_F1": 0.9816953953334799,
+    "recall_at_ultralytics_best_F1": 0.903954802259887
+  },
+  "image_level": {
+    "true_positive": 87,
+    "true_negative": 33,
+    "false_positive": 0,
+    "false_negative": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "accuracy": 1.0
+  },
+  "latency_ms": {
+    "median": 6.830809500002033,
+    "p95": 10.928776499918058,
+    "scope": "Warm CPU model.predict calls; excludes HTTP, decoding, drawing, and database writes"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+    "torch": "2.15.0+cpu",
+    "ultralytics": "8.3.205"
+  },
+  "model_sha256": "22f2b390499b0aad99cc1f6f3b38881691890c7b4633e0900c415d78e93c07b9",
+  "limitations": [
+    "Synthetic images from the same generator as training; not evidence of real factory accuracy.",
+    "One class: surface_defect. No material identification or defect subtype classification.",
+    "Confidence scores are not calibrated probabilities. No defect detected does not mean safe.",
+    "Threshold 0.35 fixed before test evaluation; test data not used for training/checkpoint selection.",
+    "Latency is machine dependent; high-resolution uploads are resized to a 128-pixel inference input."
+  ]
+}
