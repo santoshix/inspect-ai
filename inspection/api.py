@@ -82,9 +82,14 @@ def create_app(db_path=None,weights=None):
         fields=['id','created_at','filename','status','defect_count','max_confidence','inference_ms','threshold']
         buffer=io.StringIO(); writer=csv.DictWriter(buffer,fieldnames=fields,extrasaction='ignore');writer.writeheader()
         for record in app.state.store.history(10000):
-            # Stop filenames being interpreted as spreadsheet formulas.
-            record['filename']="'"+record['filename']
-            writer.writerow(record)
+            # Neutralize spreadsheet formulas, including leading spaces/tabs.
+            # Preserve benign names and leave the stored history unchanged.
+            safe_record = dict(record)
+            filename = str(safe_record.get('filename') or '')
+            if filename.lstrip().startswith(('=', '+', '-', '@')):
+                filename = "'" + filename
+            safe_record['filename'] = filename
+            writer.writerow(safe_record)
         return Response(buffer.getvalue(),media_type='text/csv',headers={'Content-Disposition':'attachment; filename="inspections.csv"'})
     return app
 

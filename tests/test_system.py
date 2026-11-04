@@ -97,3 +97,23 @@ def test_splits_do_not_overlap():
     sets=[{hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/'data/images'/s).glob('*.png')}
           for s in ['train','val','test']]
     assert not sets[0]&sets[1] and not sets[0]&sets[2] and not sets[1]&sets[2]
+
+
+def test_csv_preserves_safe_filename(client):
+    response=client.post('/api/inspect',files={'file':('safe_product.png',png(),'image/png')})
+    assert response.status_code==200
+    csv_result=client.get('/api/export.csv')
+    assert csv_result.status_code==200
+    import csv as csv_module
+    rows=list(csv_module.DictReader(io.StringIO(csv_result.text)))
+    assert any(row['filename']=='safe_product.png' for row in rows)
+
+
+def test_csv_escapes_whitespace_prefixed_formula(client):
+    response=client.post('/api/inspect',files={'file':('  =2+2.png',png(),'image/png')})
+    assert response.status_code==200
+    import csv as csv_module
+    rows=list(csv_module.DictReader(io.StringIO(client.get('/api/export.csv').text)))
+    assert any(row['filename'].startswith("'  =") for row in rows)
+    # Export formatting must not mutate stored history.
+    assert any(row['filename']=='  =2+2.png' for row in client.get('/api/history').json())
