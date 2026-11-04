@@ -146,20 +146,18 @@ docker compose up --build
 
 Open http://127.0.0.1:8000. Stop with Ctrl+C, then `docker compose down`. History is preserved in a named Docker volume. `docker compose down -v` deletes that history. The Compose port is bound to localhost. Docker configuration is included; see the verification report for whether it was executed in the build environment.
 
-## Publish your source to GitHub
+## Repository and updates
 
-Create an empty repository named `inspectai` in your own GitHub account. Do not initialize it with a README if you follow these commands. Open the `inspect-ai` folder in VS Code:
+This project is already published at **[santoshshah2003/inspect-ai](https://github.com/santoshshah2003/inspect-ai)**. You do not need to create a second repository or run `git init` again.
+
+To obtain a fresh copy, use:
 
 ```powershell
-git init
-git add .
-git commit -m "Build InspectAI visual defect inspection system"
-git branch -M main
-git remote add origin https://github.com/santoshshah2003/inspectai.git
-git push -u origin main
+git clone https://github.com/santoshshah2003/inspect-ai.git
+cd inspect-ai
 ```
 
-That URL is the suggested destination, not a repository created by this package. Use your actual repository URL if different. The model and data are small enough for a demo repository. Virtual environments, runtime history and training run directories are ignored.
+If you cloned it previously, run `git pull` after confirming you have no uncommitted local changes. To contribute, create a feature branch and submit a pull request instead of replacing the main branch.
 
 ## Responsible project claims
 
