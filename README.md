@@ -1,62 +1,72 @@
-# InspectAI — Visual Defect Detection & AI Inspection System
+# Inspect-AI — Computer Vision Defect Inspection
 
-A complete local computer-vision portfolio project: upload an image, detect surface defects with a trained YOLOv8n model, inspect bounding boxes, and keep an auditable inspection history.
+**A working local visual-inspection application** built with **YOLOv8n, PyTorch, OpenCV, FastAPI, SQLite, and Docker**. Upload a surface image, detect and highlight suspected defects, review inspection history, and export inspection results.
 
-**Ready to run:** the trained checkpoint and example images are included. No AWS, GPU, credentials, or external inference API required. First-time dependency installation needs internet.
+> **Educational research demo:** The trained detector learns from **synthetic surface textures**, not real factory photographs. Its results do not establish production inspection accuracy or product safety. It detects one label, `surface_defect`, rather than separate scratch, stain, or pit categories.
 
-**Scope:** an educational system trained and evaluated on original synthetic textures. It is not a validated production quality-control system. The model predicts one class, `surface_defect`; it does not distinguish scratch, pit, and stain subtypes or certify that a product is safe. Real photographs need real labeled training data and independent validation.
+## Model performance — held-out synthetic test set
 
-## Start on Windows
+| Metric | Result |
+|---|---:|
+| Detection mAP@50 | **95.56%** |
+| Detection mAP@50:95 | **82.15%** |
+| Detection precision (Ultralytics best-F1 point) | **98.17%** |
+| Detection recall (Ultralytics best-F1 point) | **90.40%** |
+| Warm CPU inference p95 | **10.93 ms** |
 
-1. Extract the entire ZIP to a normal folder such as `C:\Projects\InspectAI`.
-2. Install 64-bit **Python 3.12** with the Python Launcher if you do not have it.
-3. Inside `inspect-ai`, double-click `setup_windows.bat` and wait for success.
-4. Double-click `START_INSPECTAI.bat`.
-5. After the terminal says startup is complete, open **http://127.0.0.1:8000** in Chrome.
-6. Click a sample thumbnail or upload a PNG/JPEG, then choose **Run inspection**.
+The evaluation uses **120 test images** from a synthetic dataset with **480 train / 120 validation / 120 test** images. The 10.93 ms measurement covers warm `model.predict` calls only—it **excludes** HTTP, decoding, annotation rendering, and database work. The reported detection precision and recall use Ultralytics' best-F1 operating point; the dashboard's default threshold is **0.35**. The test results are from the **same synthetic image generator family** as training, so they cannot be generalized to real industrial defects.
 
-Keep the terminal open while using the dashboard. Press Ctrl+C to stop.
+Read the source measurements in [`reports/evaluation.json`](reports/evaluation.json) and methodology in [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
 
-For copy-and-paste commands and troubleshooting, see [the Windows guide](docs/WINDOWS_GUIDE.md).
+## What you can do
 
-## Included capabilities
+- **Real model inference:** Run the shipped YOLOv8n checkpoint locally on CPU, with bounding boxes and confidence scores.
+- **Web-based inspection:** Upload PNG/JPEG images or use included samples; adjust the confidence threshold and download annotated results.
+- **History and exports:** Store inspection metadata in SQLite, view results and counts, and export CSV or JSON.
+- **Backend API:** Access FastAPI interactive documentation, including image inspection and saved inspection summaries.
+- **Batch workflow:** Run the inspector over a folder from the command line.
+- **Reproducible ML:** Generate labeled synthetic data, retrain the detector, and rerun an isolated test evaluation.
+- **Tests and packaging:** Automated Python tests, GitHub Actions, a Dockerfile, Compose, and Windows startup scripts.
 
-- Actual PyTorch-backed YOLOv8n object detection, trained from scratch on the included data.
-- Bounding boxes, confidence threshold adjustment, image-level decisions and model timing.
-- OpenCV image processing and annotated image export; EXIF rotation handled before inference.
-- FastAPI JSON API with Swagger documentation at `/docs`.
-- Responsive browser dashboard; no Node.js build or separate frontend server needed.
-- SQLite inspection history, summary counts, and CSV/JSON export.
-- Batch folder inspection from the command line.
-- Deterministic synthetic-data generator; train/validation/test directories and box labels.
-- Retraining script, test evaluation, measured results, and checkpoint hash.
-- Automated tests covering real model inference, upload validation, persistence and exports.
-- Dockerfile, Compose configuration, local startup scripts and GitHub Actions test workflow.
-
-## Architecture
-
-The browser sends an image to FastAPI. Pillow validates it and applies EXIF orientation, then OpenCV converts its pixels. A shared YOLO detector predicts bounding boxes; the app draws annotations and saves metadata to SQLite. The browser displays the image and refreshes history. Raw uploads and annotated image bytes are **not persisted** by the server. You can download the result yourself.
-
-Inference requests share a lock because the Ultralytics predictor is mutable. A thread pool keeps model work off the asynchronous request loop. This is a single-process, local demo; it is not a distributed inference queue.
-
-## Folder map
+## How it works
 
 ```text
-inspection/          API, model inference, image decoding, SQLite storage
-web/                 Browser dashboard: HTML, CSS and JavaScript
-models/              Trained YOLO checkpoint + metadata
-samples/             Independent synthetic examples for the dashboard
-data/                480 training / 120 validation / 120 test images + labels
-scripts/             Generate data, train, evaluate, batch inference
-reports/             Actual evaluation, training history and verification results
-tests/               Automated model/API/storage tests
-docs/                Windows guide, model card, real-data guide, demo script
-runtime/             Created at runtime: local database and resolved data paths
+Browser image upload / sample
+          ↓
+FastAPI (validate image and orientation)
+          ↓
+Pillow / OpenCV image preparation
+          ↓
+PyTorch + YOLOv8n defect detection
+          ↓
+Bounding boxes + annotated image response
+          ↓
+SQLite inspection metadata + browser history
 ```
 
-## Manual setup (PowerShell)
+The app is a single-process, local demo. Upload and annotated image bytes are returned to the browser and **not persisted by the server**; only inspection metadata is stored. Inference uses a shared lock around the Ultralytics predictor.
 
-Open the `inspect-ai` folder in VS Code, then Terminal → New Terminal:
+## Quick start — Windows
+
+The trained checkpoint and example images are already included. **No GPU, cloud account, model API key, or training step is required.** Initial dependency installation requires an internet connection.
+
+1. Install **64-bit Python 3.12** with the Python Launcher.
+2. Clone this repository or download and extract its ZIP to a regular folder.
+3. In the project folder, double-click **`setup_windows.bat`** to create the isolated environment and install dependencies.
+4. Double-click **`START_INSPECTAI.bat`**.
+5. Open **http://127.0.0.1:8000** in your browser.
+6. Try a bundled `defect_01.png` or `clean_01.png` sample, then upload another PNG/JPEG and click **Run inspection**.
+
+For a Git-based checkout:
+
+```powershell
+git clone https://github.com/santoshix/inspect-ai.git
+cd inspect-ai
+```
+
+Keep the server terminal open while using the app. Stop it with **Ctrl+C**. See [Windows setup and troubleshooting](docs/WINDOWS_GUIDE.md) for step-by-step commands and common problems. Windows launch scripts are supplied, but the original delivery verification was done on Linux rather than a Windows host.
+
+### Manual Windows installation (VS Code → Terminal)
 
 ```powershell
 py -3.12 -m venv .venv-inspect
@@ -66,33 +76,21 @@ py -3.12 -m venv .venv-inspect
 .\.venv-inspect\Scripts\python.exe -m uvicorn inspection.api:app --host 127.0.0.1 --port 8000
 ```
 
-Commands use the environment's Python directly; PowerShell activation is unnecessary.
+**API docs:** http://127.0.0.1:8000/docs. On Linux, create `.venv-inspect` with Python 3.12, install the same dependencies using `.venv-inspect/bin/python`, and run `bash start.sh`. macOS is not a validated target.
 
-## Linux setup
+## Run automated tests
 
-```bash
-python3.12 -m venv .venv-inspect
-.venv-inspect/bin/python -m pip install --upgrade pip
-.venv-inspect/bin/python -m pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/cpu
-.venv-inspect/bin/python -m pip install -r requirements-dev.txt
-bash start.sh
-```
-
-Validated on Linux CPU/Python 3.12. Windows launch scripts are supplied but have not been executed on a Windows machine here. CPU wheel availability depends on OS and architecture; this setup targets 64-bit Windows/Linux. macOS is not a validated target.
-
-## Run tests
-
-In a second terminal, with the project folder open:
+With dependencies installed:
 
 ```powershell
 .\.venv-inspect\Scripts\python.exe -m pytest -q
 ```
 
-Tests use a temporary database, not your dashboard history. See `reports/verification.txt` for the delivery-time results.
+The repository's [GitHub Actions workflow](../../actions) runs tests on pushes and pull requests. The latest public GitHub run should be checked separately; the original [delivery verification notes](reports/verification.txt) describe tests executed at packaging time and their limits. **CI tests do not establish real-world visual inspection performance.**
 
-## Training and evaluation
+## Reproduce training and evaluation
 
-You do not need to train before using the included demo. To reproduce it, stop the server first:
+The shipped checkpoint is ready to use. To regenerate/retrain it, stop the server and **back up `models/defect_yolo.pt`** first (the training process replaces it).
 
 ```powershell
 .\.venv-inspect\Scripts\python.exe -m scripts.generate_data
@@ -100,82 +98,62 @@ You do not need to train before using the included demo. To reproduce it, stop t
 .\.venv-inspect\Scripts\python.exe -m scripts.evaluate
 ```
 
-The generator replaces generated split PNG/TXT files. Training uses `yolov8n.yaml` architecture initialization, so it does not require pretrained COCO weights. Validation selects the checkpoint; the test split is used only for evaluation. Retraining replaces `models/defect_yolo.pt`; back up that file to keep the shipped model. Hardware/library differences can change results even with fixed seeds.
+Training initializes the `yolov8n.yaml` model architecture from scratch without downloading a pretrained COCO checkpoint. Validation selects the saved checkpoint; held-out test data is used only for evaluation. Retraining metrics may vary across CPUs and library versions. The bundled model uses a **128-pixel model input**, which limits sensitivity to very small defects.
 
-The default inference threshold is **0.35**, chosen before test evaluation. Reported image metrics use this threshold; Ultralytics detection precision/recall are reported at its best-F1 point, which is a different operating point. mAP integrates over confidence thresholds.
+To transition to actual industrial images, follow the [real-data validation guide](docs/REAL_DATA_GUIDE.md). A real-data evaluation would require labeled real product photos, product/batch-aware splits, threshold selection on validation data, and an independent test set.
 
-`reports/evaluation.json` contains actual measured metrics and machine-dependent latency. Do not describe these as real-world manufacturing accuracy.
+## API endpoints
 
-## Batch inference
+| Endpoint | Function |
+|---|---|
+| `GET /health` | Application/model health |
+| `POST /api/inspect` | Inspect a user-uploaded image |
+| `POST /api/inspect-sample/{name}` | Inspect a bundled sample |
+| `GET /api/history` | Recent inspection metadata |
+| `GET /api/summary` | Inspection counts and timing |
+| `GET /api/model-report` | Stored synthetic-data evaluation |
+| `GET /api/export.csv` | Download recent inspection history |
 
-```powershell
-.\.venv-inspect\Scripts\python.exe -m scripts.batch_inspect samples --output runtime/batch
-```
-
-Produces annotated PNGs and `results.json`. This CLI does not add records to the web dashboard database.
-
-## API examples
-
-With the server running, open http://127.0.0.1:8000/docs → `POST /api/inspect` → Try it out → choose a file → Execute.
-
-Or in PowerShell:
+For example, from the project directory with the server running:
 
 ```powershell
 curl.exe -X POST "http://127.0.0.1:8000/api/inspect" -F "file=@samples/defect_01.png" -F "threshold=0.35"
 ```
 
-| Endpoint | Purpose |
-|---|---|
-| `GET /health` | Confirms model startup |
-| `POST /api/inspect` | Multipart image + threshold |
-| `POST /api/inspect-sample/{name}` | Inspect a bundled sample |
-| `GET /api/history` | Latest inspection metadata |
-| `GET /api/summary` | Counts and average model inference time |
-| `GET /api/model-report` | Frozen synthetic test results |
-| `GET /api/export.csv` | Latest 10,000 records as CSV |
+The model's confidence scores are **not calibrated fraud-like probabilities**, nor proof a surface is safe. Image coordinates correspond to the returned displayed image after orientation/resizing.
 
-Bounding boxes are `[x1,y1,x2,y2]` in the returned displayed image's coordinate space, after orientation and optional resizing. The image is further letterboxed to a 128-pixel model input internally. Scores are not calibrated probabilities.
+## Optional Docker
 
-## Docker (optional)
-
-Install and start Docker Desktop, then from the project directory:
-
-```powershell
+```bash
 docker compose up --build
 ```
 
-Open http://127.0.0.1:8000. Stop with Ctrl+C, then `docker compose down`. History is preserved in a named Docker volume. `docker compose down -v` deletes that history. The Compose port is bound to localhost. Docker configuration is included; see the verification report for whether it was executed in the build environment.
+Visit http://127.0.0.1:8000. The Compose port binds to localhost and a named volume preserves SQLite history. `docker compose down` stops the app; `docker compose down -v` **deletes** the persisted inspection history. Docker setup is provided, but the original delivery verification did **not** include a successful Docker runtime test.
 
-## Repository and updates
+## Repository map
 
-This project is already published at **[santoshshah2003/inspect-ai](https://github.com/santoshshah2003/inspect-ai)**. You do not need to create a second repository or run `git init` again.
-
-To obtain a fresh copy, use:
-
-```powershell
-git clone https://github.com/santoshshah2003/inspect-ai.git
-cd inspect-ai
+```text
+inspection/           FastAPI, YOLO inference, validation, SQLite
+web/                  HTML/CSS/JavaScript inspection dashboard
+models/               Included trained checkpoint and metadata
+samples/              Example images
+data/                 Synthetic train/validation/test images and YOLO labels
+scripts/              Generate, train, evaluate, and batch inspect
+reports/              Measured model results and verification notes
+docs/                 Windows guide, model card, real-data guide
+tests/                Model, API, upload and persistence checks
+setup_windows.bat     Windows dependency installation
+START_INSPECTAI.bat   Windows server launcher
+Dockerfile            Container build
+compose.yaml          Local Docker deployment
 ```
 
-If you cloned it previously, run `git pull` after confirming you have no uncommitted local changes. To contribute, create a feature branch and submit a pull request instead of replacing the main branch.
+## Interview-ready description
 
-## Responsible project claims
+> Built Inspect-AI, a local computer vision inspection application with YOLOv8n, PyTorch, OpenCV, FastAPI, and SQLite. Trained a one-class object detector on 720 synthetic surface images, achieving 95.56% mAP@50 and 82.15% mAP@50:95 on a held-out synthetic test split. Implemented image upload, annotated predictions, inspection history, export tools, Docker packaging, and automated tests.
 
-Once you have run and understood the project, a factual description is:
+## Limitations and responsible use
 
-“Built a local visual inspection application using PyTorch-backed YOLOv8n, OpenCV and FastAPI. Trained and evaluated a one-class defect detector on synthetic surface images, served annotated predictions through a browser dashboard, and added persistent inspection history, exports and automated tests.”
+This is a **synthetic-data research demo**, not a validated quality-control system. Before real production use it would require a representative real-world labeled dataset, material- and product-specific testing, failure analysis, well-calibrated review thresholds, authentication, upload limits at the proxy, TLS, observability, and operational safeguards. A missing detection is **not** proof that a product is defect-free.
 
-Add measured metrics only with the synthetic-test qualification. Do not claim AWS deployment, real factory validation, independent authorship without assistance, or production readiness. Be ready to explain the training split, IoU, confidence threshold, false negatives, and API flow.
-
-## Production work still required
-
-Real defect data, per-product validation, calibrated operating thresholds, monitoring for drift, authentication, transport security, reverse-proxy request limits, load tests, backup policy and an operational review are required before external or industrial use. The app intentionally defaults to local-only access. Upload validation happens after multipart parsing; use an upstream body limit before exposing it publicly. Only load model checkpoints from trusted sources.
-
-## Sources and dependencies
-
-- [Ultralytics training](https://docs.ultralytics.com/modes/train/)
-- [Ultralytics Python usage](https://docs.ultralytics.com/usage/python/)
-- [FastAPI file uploads](https://fastapi.tiangolo.com/tutorial/request-files/)
-- [PyTorch installation](https://pytorch.org/get-started/locally/)
-
-See `THIRD_PARTY_NOTICES.md` for dependency and model licensing notes.
+**Licensing:** Ultralytics YOLO has its own AGPL-3.0 licensing obligations. Read [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md), [`LICENSE-ULTRALYTICS`](LICENSE-ULTRALYTICS), and the [Ultralytics licensing page](https://www.ultralytics.com/license). Do not assume a permissive license from the repository being public.
