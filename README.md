@@ -64,7 +64,7 @@ git clone https://github.com/santoshix/inspect-ai.git
 cd inspect-ai
 ```
 
-Keep the server terminal open while using the app. Stop it with **Ctrl+C**. See [Windows setup and troubleshooting](docs/WINDOWS_GUIDE.md) for step-by-step commands and common problems. Windows launch scripts are supplied, but the original delivery verification was done on Linux rather than a Windows host.
+Keep the server terminal open while using the app. Stop it with **Ctrl+C**. See [Windows setup and troubleshooting](docs/WINDOWS_GUIDE.md) for step-by-step commands, and the [two-minute demo and interview guide](docs/DEMO_AND_INTERVIEW.md) for explaining the project to recruiters. Windows launch scripts are supplied, but the original delivery verification was done on Linux rather than a Windows host.
 
 ### Manual Windows installation (VS Code → Terminal)
 
@@ -86,7 +86,7 @@ With dependencies installed:
 .\.venv-inspect\Scripts\python.exe -m pytest -q
 ```
 
-The repository's [GitHub Actions workflow](../../actions) runs tests on pushes and pull requests. The latest public GitHub run should be checked separately; the original [delivery verification notes](reports/verification.txt) describe tests executed at packaging time and their limits. **CI tests do not establish real-world visual inspection performance.**
+The repository's [GitHub Actions workflow](https://github.com/santoshix/inspect-ai/actions) runs tests on pushes and pull requests. The latest public GitHub run should be checked separately; the original [delivery verification notes](reports/verification.txt) describe tests executed at packaging time and their limits. **CI tests do not establish real-world visual inspection performance.**
 
 ## Reproduce training and evaluation
 
