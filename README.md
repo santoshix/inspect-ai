@@ -120,7 +120,7 @@ For example, from the project directory with the server running:
 curl.exe -X POST "http://127.0.0.1:8000/api/inspect" -F "file=@samples/defect_01.png" -F "threshold=0.35"
 ```
 
-The model's confidence scores are **not calibrated fraud-like probabilities**, nor proof a surface is safe. Image coordinates correspond to the returned displayed image after orientation/resizing.
+The model's confidence scores are **not calibrated probabilities**, nor proof a surface is safe. Image coordinates correspond to the returned displayed image after orientation/resizing.
 
 ## Optional Docker
 
